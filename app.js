@@ -1,3 +1,5 @@
+// Importing the necesary dependancies 
+
 const express = require("express");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
@@ -6,6 +8,8 @@ const passport = require("passport");
 const PLM = require("passport-local-mongoose");
 
 const app = express();
+
+// Setting up the work folder to use EJS
 
 app.set("view engine", "ejs");
 
@@ -19,13 +23,21 @@ app.use(
     saveUninitialized: false,
   })
 );
+
+// Initializing the session for Passport authentication
+
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Connecting Mongoose to the Database 
 
 mongoose.connect("mongodb://localhost:27017/USERDATA", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+
+
+// Initializing the Various schemas to be used in mongoose 
 
 const itemSchema = {
   name: String
@@ -71,6 +83,8 @@ const userSchema = new mongoose.Schema({
   });
   
   userSchema.plugin(PLM);
+
+  // Making mongoose models based on above defined schemas
   
   const User = new mongoose.model("User", userSchema);
   
@@ -90,6 +104,8 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
+// Coding the get and post requests for various EJS templates
+
 app.get("/", function (req, res) {
   res.render("home");
 });
@@ -108,6 +124,9 @@ app.get("/logout", function (req, res) {
 app.get("/home_ps", function (req, res) {
   Post.find({}, function (err, foundPost) {
     console.log(foundPost);
+
+    // Loads the Homepage for Personal Space by embeddin the starting Content into the EJS templates 
+
     res.render("PS/home_ps", {
       homeContent: homeStartingContent,
       newPost: foundPost,
@@ -133,18 +152,8 @@ app.get("/about_task", function (req, res) {
 });
 
 
-app.get("/home_ps", function (req, res) {
-  Post.find({}, function (err, foundPost) {
-    console.log(foundPost);
-    res.render("PS/home_ps", {
-      homeContent: homeStartingContent,
-      newPost: foundPost,
-    });
-  });
-});
-
 app.get("/posts/:topic", function (req, res) {
-  // Dynamic role in websites , Just like parameters in API
+  // This block of code looks for a particular topic and if it is present in the Database , then it loads the page else it throws an error 
   let topic = req.params.topic;
   Post.findOne({ title: topic }, function (err, foundPost) {
     if (!err) {
@@ -161,11 +170,13 @@ app.get("/posts/:topic", function (req, res) {
 app.get("/home_task", function (req, res) {
   Item.find({}, function (err, foundItems) {
       if (foundItems.length == 0) {
+        // If there are no more tasks present , then it refreshes the page with the default taks 
           Item.insertMany(defaultItems, function (err) { });
           res.redirect("home_task")
 
       }
       else {
+        // Else it returns the pending tasks             
           res.render('task/list_task', { listTitle: "Today", newListItems: foundItems });
       }
   })
@@ -198,12 +209,15 @@ app.get("/home_task", function (req, res) {
   })
 })
 
+// Coding the post requests for various EJS templates
+
 
 app.post("/home_ps", function (req, res) {
   const post = new Post({
     title: req.body.postTitle,
     content: req.body.postBody,
   });
+  // Saves the post and returns to the homepage
   post.save();
   res.redirect("home_ps");
 });
@@ -213,7 +227,7 @@ app.post("/login", function (req, res) {
     username: req.body.username,
     password: req.body.password,
   });
-
+  // Look for a user in the database . If found then it allows the user to enter , else it throws an err
   req.login(user, function (err) {
     if (err) {
       console.log(err);
@@ -226,6 +240,7 @@ app.post("/login", function (req, res) {
 });
 
 app.post("/register", function (req, res) {
+  // Registers the new users into the Database
   User.register(
     {
       username: req.body.username,
@@ -269,6 +284,8 @@ app.post("/home_task", function (req, res) {
 })
 
 app.post("/delete", function (req, res) {
+
+  // Removes and deletes the entry of the selected task from the database and returns to the homepage of task schedular
   const removeId = req.body.checkbox;
   const removeName = req.body.listName;
   if (removeName == "Today") {
