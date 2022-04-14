@@ -1,0 +1,12 @@
+<%- include("header_ps") %>
+    <h1>Add Something to your Journal 📖✏️</h1>
+
+    <form action="/home_ps" method="post">
+        <label for="exampleFormControlInput1" class="form-label" style="font-size: 1.8rem;">Title</label>
+        <input type="text" class="form-control" id="exampleFormControlInput1" name="postTitle" >
+        <label for="exampleFormControlTextarea1" class="form-label" style="font-size: 1.8rem;">Content</label>
+        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" cols="30" name="postBody"></textarea>
+        <button type="submit" name="button" class="btn btn-primary pad">Add to Journal</button>
+    </form>
+
+    <%- include("footer_ps") %>
